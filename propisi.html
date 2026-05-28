@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Всё сходится | Генератор прописей</title>
+    
+    <style>
+        @font-face {
+            font-family: 'Propisi';
+            src: url('https://cdn.jsdelivr.net/gh/onlinetochilka/fonts@main/ofont.ru_Propisi.ttf') format('truetype');
+            font-weight: normal; 
+            font-style: normal;
+        }
+
+        :root {
+            --text-main: #0F172A;
+            --academic-blue: #1A237E;  
+            --accent-red: #E53935;
+            --accent-red-hover: #D32F2F; 
+            --line-color: #94A3B8;     
+            --aux-line-color: #CBD5E1; 
+            --margin-color: #F87171;   
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            /* Мягкий градиентный фон для усиления эффекта стекла */
+            background: linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 100%);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; }
+        
+        h1 { 
+            font-size: 2.2rem; 
+            margin-bottom: 12px; 
+            text-align: center; 
+        }
+        
+        p.subtitle { 
+            text-align: center; 
+            margin-bottom: 40px; 
+            color: #475569; 
+            font-size: 1.1rem; 
+        }
+
+        /* --- Apple-style Glassmorphism для панелей --- */
+        .panel {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.04);
+            padding: 40px; 
+            margin-bottom: 40px;
+        }
+
+        .preview-wrapper {
+            display: flex; justify-content: center; gap: 20px;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 20px; 
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03); 
+            overflow-x: auto;
+        }
+
+        .worksheet-paper {
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.06);
+            position: relative;
+            min-height: 210mm;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            overflow: hidden; 
+        }
+
+        /* --- Элементы управления --- */
+        .controls-grid { 
+            display: grid; 
+            grid-template-columns: 1fr; 
+            gap: 28px; 
+            margin-bottom: 32px;
+        }
+
+        @media (min-width: 768px) { 
+            .controls-grid { grid-template-columns: 1fr 1fr; } 
+        }
+
+        .full-width { grid-column: 1 / -1; }
+        .form-group { display: flex; flex-direction: column; }
+        
+        label { 
+            font-weight: 600; 
+            margin-bottom: 10px; 
+            font-size: 0.95rem; 
+        }
+
+        textarea, select {
+            width: 100%; 
+            padding: 16px; 
+            border: 1px solid rgba(224, 224, 224, 0.8); 
+            border-radius: 12px;
+            font-family: inherit; 
+            font-size: 1rem;
+            color: var(--text-main);
+            background-color: rgba(255, 255, 255, 0.8);
+            transition: all 0.2s ease;
+        }
+        
+        textarea { min-height: 120px; resize: vertical; }
+
+        textarea:focus, select:focus { 
+            outline: none; 
+            border-color: var(--academic-blue); 
+            background-color: #FFFFFF;
+            box-shadow: 0 0 0 3px rgba(26, 35, 126, 0.1); 
+        }
+
+        /* Инструкция сразу под селектом */
+        .instruction-box {
+            background-color: rgba(248, 249, 250, 0.8); 
+            border-left: 4px solid var(--academic-blue);
+            padding: 16px 20px; 
+            border-radius: 0 8px 8px 0; 
+            margin-top: 16px;
+            color: var(--academic-blue);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .instruction-icon { font-size: 1.2rem; line-height: 1.4; }
+
+        /* --- Кнопки --- */
+        .button-group {
+            display: flex;
+            gap: 16px;
+            margin-top: 32px;
+        }
+
+        @media (max-width: 600px) {
+            .button-group { flex-direction: column; }
+        }
+
+        .btn-primary, .btn-secondary {
+            flex: 1;
+            border-radius: 12px; 
+            padding: 18px;
+            font-size: 1.1rem; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-red);
+            color: #FFFFFF; 
+            border: none; 
+            box-shadow: 0 8px 20px rgba(229, 57, 53, 0.25); 
+        }
+
+        .btn-primary:hover { 
+            background-color: var(--accent-red-hover); 
+            transform: translateY(-2px); 
+            box-shadow: 0 12px 24px rgba(229, 57, 53, 0.35);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--academic-blue);
+            border: 2px solid var(--academic-blue);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(26, 35, 126, 0.05);
+            transform: translateY(-2px); 
+        }
+
+        /* --- Разлиновка --- */
+        .red-line {
+            position: absolute; top: 0; bottom: 0; left: 20mm;
+            width: 1px; background-color: var(--margin-color); z-index: 10;
+        }
+
+        .text-content {
+            position: relative; z-index: 20; 
+            padding-left: 25mm; padding-right: 10mm;
+            font-family: 'Propisi', cursive;
+            font-size: 36pt; 
+            white-space: pre-wrap; word-wrap: break-word;
+        }
+
+        .grid-wide .text-content { 
+            line-height: 36px; 
+            padding-top: 18px; 
+        }
+        
+        .grid-narrow .text-content, 
+        .grid-slanted .text-content, 
+        .grid-frequent .text-content { 
+            line-height: 48px; 
+            padding-top: 12px; 
+        }
+
+        .mode-tracing .text-content { color: var(--line-color); } 
+        .mode-copy .text-content { color: var(--text-main); } 
+
+        /* Логика макетов */
+        .layout-1-page .worksheet-paper:nth-child(2) { display: none; }
+        .layout-1-page .worksheet-paper:nth-child(1) { width: 170mm; margin: 0 auto; }
+        .layout-2-pages .worksheet-paper { width: 148.5mm; border-right: 1px dashed var(--aux-line-color); }
+
+        /* ИДЕАЛЬНАЯ ПЕЧАТЬ */
+        @media print {
+            body { padding: 0; margin: 0; background: none; }
+            .no-print { display: none !important; }
+            
+            /* Убиваем стили стекла при печати, чтобы фон был 100% белым */
+            .preview-wrapper, .worksheet-paper {
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+                background: white !important;
+            }
+
+            .preview-wrapper {
+                position: absolute; top: 0; left: 0;
+                padding: 0; margin: 0; border: none; box-shadow: none; 
+            }
+            .worksheet-paper { border: none; box-shadow: none; border-radius: 0; }
+
+            /* 1 страница на А4 */
+            body.print-1-page @page { size: A4 portrait; margin: 0; }
+            body.print-1-page .preview-wrapper { 
+                width: 210mm; height: 297mm; display: block; 
+            }
+            body.print-1-page .worksheet-paper { 
+                width: 170mm; height: 297mm; margin: 0 auto; 
+            }
+
+            /* 2 страницы на А4 */
+            body.print-2-pages @page { size: A4 landscape; margin: 0; }
+            body.print-2-pages .preview-wrapper {
+                width: 297mm; height: 210mm;
+                display: flex; justify-content: flex-start; align-items: flex-start;
+            }
+            body.print-2-pages .worksheet-paper {
+                width: 148.5mm; height: 210mm; margin: 0;
+                border-right: 1px dashed var(--aux-line-color); flex-shrink: 0;
+            }
+            body.print-2-pages .worksheet-paper:last-child { border-right: none; }
+        }
+    </style>
+</head>
+<body class="print-1-page">
+
+    <div class="container">
+        <div class="no-print">
+            <h1>Генератор прописей</h1>
+            <p class="subtitle">Создавайте идеальные листы для тренировки почерка за пару кликов. Без мучений в Word.</p>
+        </div>
+
+        <div class="panel no-print">
+            <div class="controls-grid">
+                <div class="form-group full-width">
+                    <label for="textInput">Что будем писать?</label>
+                    <textarea id="textInput" placeholder="Введите буквы, слоги или предложения...">Аа Бб Вв Гг Дд&#10;Пишу красиво и легко.&#10;С Точилкой всё сходится!</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="gridSelect">Сетка</label>
+                    <select id="gridSelect">
+                        <option value="frequent">Частая косая (1 класс)</option>
+                        <option value="slanted">Косая линия</option>
+                        <option value="narrow">Узкая линия</option>
+                        <option value="wide">Широкая линия</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="modeSelect">Тип задания</label>
+                    <select id="modeSelect">
+                        <option value="tracing">Для обводки (светлые буквы)</option>
+                        <option value="copy">Для списывания (темные буквы)</option>
+                    </select>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="layoutSelect">Размещение на бумаге</label>
+                    <select id="layoutSelect">
+                        <option value="1-page">1 тетрадный лист (печать по центру листа А4)</option>
+                        <option value="2-pages">2 тетрадных листа (компактное размещение для экономии бумаги)</option>
+                    </select>
+                    
+                    <div class="instruction-box">
+                        <div class="instruction-icon">ℹ️</div>
+                        <div id="instructionText"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button class="btn-primary" onclick="triggerPrint('print')">🖨️ Распечатать</button>
+                <button class="btn-secondary" onclick="triggerPrint('pdf')">📄 Скачать в PDF</button>
+            </div>
+        </div>
+
+        <div class="preview-wrapper layout-1-page" id="previewContainer">
+            <div class="worksheet-paper">
+                <div class="svg-background"></div>
+                <div class="red-line"></div>
+                <div class="text-content"></div>
+            </div>
+            <div class="worksheet-paper">
+                <div class="svg-background"></div>
+                <div class="red-line"></div>
+                <div class="text-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const textInput = document.getElementById('textInput');
+            const gridSelect = document.getElementById('gridSelect');
+            const modeSelect = document.getElementById('modeSelect');
+            const layoutSelect = document.getElementById('layoutSelect');
+            const previewContainer = document.getElementById('previewContainer');
+            const instructionText = document.getElementById('instructionText');
+            
+            const pages = document.querySelectorAll('.worksheet-paper');
+
+            function generateGridSVG(type) {
+                const isWide = type === 'wide';
+                const step = isWide ? 36 : 48;
+                let svgLines = '';
+
+                // Горизонтальные линии
+                for (let y = 48; y < 1600; y += step) {
+                    if (!isWide) {
+                        svgLines += `<line x1="0" y1="${y - 15.5}" x2="1200" y2="${y - 15.5}" stroke="var(--line-color)" />`;
+                    }
+                    svgLines += `<line x1="0" y1="${y + 0.5}" x2="1200" y2="${y + 0.5}" stroke="var(--line-color)" />`;
+                }
+
+                // Косые линии
+                if (type === 'slanted' || type === 'frequent') {
+                    const slantSpace = type === 'frequent' ? 24 : 100; 
+                    const dx = 1600 / 2.1445; 
+                    for (let x = -dx; x < 1200 + dx; x += slantSpace) {
+                        svgLines += `<line x1="${x + dx}" y1="0" x2="${x}" y2="1600" stroke="var(--aux-line-color)" />`;
+                    }
+                }
+
+                return `<svg width="100%" height="100%" style="position:absolute; top:0; left:0; z-index:0; pointer-events:none;" xmlns="http://www.w3.org/2000/svg">${svgLines}</svg>`;
+            }
+
+            const updateView = () => {
+                const svgContent = generateGridSVG(gridSelect.value);
+                const textValue = textInput.value;
+                const layout = layoutSelect.value;
+                const modeClass = `worksheet-paper mode-${modeSelect.value} grid-${gridSelect.value}`;
+
+                previewContainer.className = `preview-wrapper layout-${layout}`;
+                document.body.className = `print-${layout}`;
+                
+                instructionText.innerHTML = layout === '1-page' 
+                    ? "Перед печатью убедитесь, что в настройках принтера поля установлены <b>«По умолчанию»</b> или <b>«Нет»</b>.<br><br>Обязательно включите настройку <b>«Печать фоновой графики»</b>."
+                    : "Перед печатью убедитесь, что в настройках принтера поля установлены <b>«Нет»</b>, а ориентация — <b>«Альбомная»</b>.<br><br>Обязательно включите настройку <b>«Печать фоновой графики»</b>.";
+
+                pages.forEach(page => {
+                    page.className = modeClass;
+                    page.querySelector('.svg-background').innerHTML = svgContent;
+                    page.querySelector('.text-content').textContent = textValue;
+                });
+            };
+
+            document.querySelector('.controls-grid').addEventListener('input', updateView);
+            updateView();
+            
+            // Глобальная функция для обработки кнопок печати/pdf
+            window.triggerPrint = (actionType) => {
+                const layout = layoutSelect.value;
+                
+                if (actionType === 'pdf') {
+                    instructionText.innerHTML = layout === '1-page' 
+                        ? "В окне печати в поле «Принтер» выберите <b>«Сохранить как PDF»</b>. Убедитесь, что поля установлены <b>«По умолчанию»</b> или <b>«Нет»</b>, а также включена <b>«Печать фоновой графики»</b>."
+                        : "В окне печати в поле «Принтер» выберите <b>«Сохранить как PDF»</b>. Убедитесь, что ориентация — <b>«Альбомная»</b>, поля — <b>«Нет»</b>, и включена <b>«Печать фоновой графики»</b>.";
+                } else {
+                    updateView(); // Возвращаем стандартную инструкцию
+                }
+
+                setTimeout(() => {
+                    window.print();
+                    setTimeout(updateView, 1000); 
+                }, 100);
+            };
+        });
+    </script>
+</body>
+</html>
